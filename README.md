@@ -1,19 +1,13 @@
 # Auto Deploymemnt of EKS Infrastructure on AWS with Terraform
 
 ## Project Content
-This project contains the three modules
-* **cluster-autoscaler**: Contains yaml file of cluster-autoscaler to scale out ans scale down the EKS cluster nodes. 
-* **metrics-server**: Contains metrics server yaml files to deploy the metrics server. This server is needed to collect the metrics from pods.
 * **tf-eks-demo**: Contains terraform scripts to deploy infrastructure in declarative format. 
-* **HPA(Horizontal Pod Autoscaler)**: - To scale out and scale down the pods on nodes.
 
 We create the following infrastructure on AWS with the instructions given below.
 - EC2 Instances
 - EKS Cluster
-- Horizontal Pod AutoScaler
-- Cluster AutoScaler
-- Deploying Metrics-Server
-- Deploying php-apache service 
+- Worker Nodes autoscaling group
+
 
 There are 2 ways we can deploy EKS cluster on AWS
 
@@ -25,42 +19,11 @@ There are 2 ways we can deploy EKS cluster on AWS
   we can create servers, clusters or any other infra on on-premises, AWS, Azure, GCP, IBM Cloud and many more.
   It is much useful when your organization has hybrid/multi-cloud environment.
 
-## Creating EKS cluster Using `eksctl`
-- Prerequisite: ekstl cli tool needs to be installed on laptop. 
-
-To create cluster
-````
-eksctl create cluster --region=us-east-1 --node-type=t2.medium
-````
-The above command will create EKS cluster with default parameters if you dont specify any.
-
-We can create EKS cluster using eksctl with yaml file as well with following command.
-````
-eksctl create cluster -f eks_cluster.yaml
-````
-The content of eks_cluster.yaml can be 
-````
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
-metadata:
-  name: basic-cluster
-  region: eu-north-1
-
-nodeGroups:
-  - name: ng-1
-    instanceType: m5.large
-    desiredCapacity: 10
-  - name: ng-2
-    instanceType: m5.xlarge
-    desiredCapacity: 2
-````
-
 ## Creating EKS cluster with Terraform Scripts
  - Prerequisite: kubectl & aws-iam-authenticator cli tools need to be installed on laptop.
  
 There are terraform scripts in "tf-eks-demo" folder. By running the following commands terraform creates
-EC2 instance and EKS cluster for us in the desired region. All the required configs are defined in respective script, 
+EC2 instance and EKS cluster for us in the desired/specified (eu-west-2) region and saves terraform state in s3 bucket. All the required configs are defined in respective script, 
 like IAM roles, policies, security groups, etc.
 Before executing the below scripts the user must have created an IAM role and needs to be configured
 on his laptop. Else the access_key & secret_key needs to be configured in terraform script.
@@ -109,5 +72,7 @@ kubectl get service
 To undeploy infra on, first check and delete any manually cretaed resources / policies, if incase someone created and then run the following command. This will ensure all the infra is deleted
 ````
 cd tf-eks-demo
-terraform destroy
+
+
+terraform destroy 
 ````
